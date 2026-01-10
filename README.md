@@ -56,7 +56,7 @@
 
 放在这里，ZARA看不到，输入考试时间+.jpg可以看到我偷出来的成绩单  
 
-如：在网址框里输入“https://class10-hexing.github.io/010405.jpg”可看到八上期末成绩   
+如：在网址框里输入“https://class10-hexing.github.io/010405.jpg ”可看到八上期末成绩   
 
 小心别被爸爸妈妈看到哦😊
 
