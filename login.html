@@ -3,54 +3,60 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>班级登录 - Class 10</title>
+<title>班级登录</title>
 <style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif}
+    *{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
     body{background:#f4f7ff;display:grid;place-items:center;height:100vh}
-    .login{background:white;padding:40px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.1);width:100%;max-width:400px}
-    h2{text-align:center;margin-bottom:24px;color:#222}
+    .login{background:white;padding:40px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.1);width:100%;max-width:400px}
+    h2{text-align:center;margin-bottom:24px}
     input{width:100%;padding:14px;margin:8px 0;border:1px solid #ddd;border-radius:8px;font-size:16px}
-    button{width:100%;padding:14px;background:#0066ff;color:white;border:none;border-radius:8px;font-size:16px;margin-top:10px;cursor:pointer}
-    button:hover{background:#0052cc}
-    .tip{color:red;text-align:center;margin-top:12px;display:none}
+    button{width:100%;padding:14px;background:#0d6efd;color:white;border:none;border-radius:8px;font-size:16px;margin-top:10px;cursor:pointer}
+    button:hover{background:#0b5ed7}
+    #msg{color:red;text-align:center;margin-top:12px;display:none}
 </style>
 </head>
 <body>
+
 <div class="login">
-    <h2>2024届10班 官网登录</h2>
-    <input type="text" id="user" placeholder="账号" autocomplete="off">
+    <h2>Class10 班级登录</h2>
+    <input type="text" id="user" placeholder="账号">
     <input type="password" id="pwd" placeholder="密码">
     <button onclick="login()">登录</button>
-    <div class="tip" id="msg">账号或密码错误</div>
+    <div id="msg">账号或密码错误</div>
 </div>
 
+<!-- 必须引入这个库才能读 xls -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
-// 读取 name.xls 并登录验证
-async function login(){
-    const username = document.getElementById('user').value
-    const password = document.getElementById('pwd').value
+async function login() {
+    let username = document.getElementById("user").value.trim();
+    let password = document.getElementById("pwd").value.trim();
+    let msg = document.getElementById("msg");
 
-    // 读取 GitHub 上的 name.xls
-    const res = await fetch('/name.xls')
-    const text = await res.text()
+    try {
+        // 读取你根目录的 name.xls
+        let res = await fetch("/name.xls");
+        let data = await res.arrayBuffer();
+        let workbook = XLSX.read(data, { type: "array" });
+        let sheet = workbook.Sheets[workbook.SheetNames[0]];
+        let users = XLSX.utils.sheet_to_json(sheet);
 
-    // 解析表格
-    const lines = text.trim().split('\n')
-    const users = lines.slice(1).map(line => {
-        const [u, p] = line.split(/\s+/)
-        return {u,p}
-    })
+        // 匹配账号密码
+        let ok = users.some(u => 
+            u.username == username && u.password == password
+        );
 
-    // 检查是否匹配
-    const ok = users.some(item => item.u === username && item.p === password)
-
-    if(ok){
-        localStorage.logined = 'yes'
-        location.href = 'index.html'
-    }else{
-        document.getElementById('msg').style.display = 'block'
+        if (ok) {
+            location.href = "/"; // 登录成功回首页
+        } else {
+            msg.style.display = "block";
+        }
+    } catch (e) {
+        msg.innerText = "未找到用户列表或文件格式错误";
+        msg.style.display = "block";
     }
 }
 </script>
+
 </body>
 </html>
