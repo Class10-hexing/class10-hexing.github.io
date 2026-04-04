@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>班级登录 - Class 10</title>
+<style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif}
+    body{background:#f4f7ff;display:grid;place-items:center;height:100vh}
+    .login{background:white;padding:40px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.1);width:100%;max-width:400px}
+    h2{text-align:center;margin-bottom:24px;color:#222}
+    input{width:100%;padding:14px;margin:8px 0;border:1px solid #ddd;border-radius:8px;font-size:16px}
+    button{width:100%;padding:14px;background:#0066ff;color:white;border:none;border-radius:8px;font-size:16px;margin-top:10px;cursor:pointer}
+    button:hover{background:#0052cc}
+    .tip{color:red;text-align:center;margin-top:12px;display:none}
+</style>
+</head>
+<body>
+<div class="login">
+    <h2>C2024届10班 官网登录</h2>
+    <input type="text" id="user" placeholder="账号" autocomplete="off">
+    <input type="password" id="pwd" placeholder="密码">
+    <button onclick="login()">登录</button>
+    <div class="tip" id="msg">账号或密码错误</div>
+</div>
+
+<script>
+// 读取 name.xls 并登录验证
+async function login(){
+    const username = document.getElementById('user').value
+    const password = document.getElementById('pwd').value
+
+    // 读取 GitHub 上的 name.xls
+    const res = await fetch('/name.xls')
+    const text = await res.text()
+
+    // 解析表格
+    const lines = text.trim().split('\n')
+    const users = lines.slice(1).map(line => {
+        const [u, p] = line.split(/\s+/)
+        return {u,p}
+    })
+
+    // 检查是否匹配
+    const ok = users.some(item => item.u === username && item.p === password)
+
+    if(ok){
+        localStorage.logined = 'yes'
+        location.href = 'index.html'
+    }else{
+        document.getElementById('msg').style.display = 'block'
+    }
+}
+</script>
+</body>
+</html>
