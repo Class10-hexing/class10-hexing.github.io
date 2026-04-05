@@ -25,38 +25,66 @@
     <div id="msg">账号或密码错误</div>
 </div>
 
-<!-- 必须引入这个库才能读 xls -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 async function login() {
     let username = document.getElementById("user").value.trim();
     let password = document.getElementById("pwd").value.trim();
     let msg = document.getElementById("msg");
+    msg.style.display = "none";
+
+    if (!username || !password) {
+        msg.innerText = "请输入账号和密码";
+        msg.style.display = "block";
+        return;
+    }
 
     try {
-        // 读取你根目录的 name.xls
+        // ✅ 修复：正确读取 Excel 中文编码
         let res = await fetch("/name.xls");
-        let data = await res.arrayBuffer();
-        let workbook = XLSX.read(data, { type: "array" });
+        let blob = await res.blob();
+        let data = await readBlobAsArrayBuffer(blob);
+        
+        let workbook = XLSX.read(data, { 
+            type: "array",
+            codepage: 936 // ✅ 强制中文编码（GBK）
+        });
+        
         let sheet = workbook.Sheets[workbook.SheetNames[0]];
         let users = XLSX.utils.sheet_to_json(sheet);
 
-        // 匹配账号密码
+        // 打印查看读取到的数据（方便你调试）
+        console.log("读取到用户列表：", users);
+
+        // ✅ 宽松匹配，避免类型问题
         let ok = users.some(u => 
-            u.username == username && u.password == password
+            String(u.username).trim() === username && 
+            String(u.password).trim() === password
         );
 
         if (ok) {
-            location.href = "/"; // 登录成功回首页
+            alert("登录成功！");
+            location.href = "/";
         } else {
+            msg.innerText = "账号或密码错误";
             msg.style.display = "block";
         }
     } catch (e) {
-        msg.innerText = "未找到用户列表或文件格式错误";
+        console.error(e);
+        msg.innerText = "读取用户文件失败，请检查 name.xls 是否存在";
         msg.style.display = "block";
     }
+}
+
+// ✅ 辅助函数：正确处理中文编码
+function readBlobAsArrayBuffer(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(blob);
+    });
 }
 </script>
 
 </body>
-</html>
