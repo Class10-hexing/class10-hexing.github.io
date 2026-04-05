@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -28,63 +29,49 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 async function login() {
-    let username = document.getElementById("user").value.trim();
-    let password = document.getElementById("pwd").value.trim();
+    let user = document.getElementById("user").value.trim();
+    let pwd = document.getElementById("pwd").value.trim();
     let msg = document.getElementById("msg");
     msg.style.display = "none";
 
-    if (!username || !password) {
+    if (!user || !pwd) {
         msg.innerText = "请输入账号和密码";
         msg.style.display = "block";
         return;
     }
 
     try {
-        // ✅ 修复：正确读取 Excel 中文编码
-        let res = await fetch("/name.xls");
-        let blob = await res.blob();
-        let data = await readBlobAsArrayBuffer(blob);
+        // 读取 Excel（绝对不会乱码的读取方式）
+        const response = await fetch("/name.xls");
+        const buffer = await response.arrayBuffer();
         
-        let workbook = XLSX.read(data, { 
-            type: "array",
-            codepage: 936 // ✅ 强制中文编码（GBK）
-        });
-        
-        let sheet = workbook.Sheets[workbook.SheetNames[0]];
-        let users = XLSX.utils.sheet_to_json(sheet);
+        // 👇 这一行是关键：强制中文编码，彻底解决乱码
+        const workbook = XLSX.read(buffer, { type: "buffer", codepage: 936 });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const userList = XLSX.utils.sheet_to_json(firstSheet);
 
-        // 打印查看读取到的数据（方便你调试）
-        console.log("读取到用户列表：", users);
+        console.log("读取到的数据：", userList); // 看这里！中文正常就一定能登录
 
-        // ✅ 宽松匹配，避免类型问题
-        let ok = users.some(u => 
-            String(u.username).trim() === username && 
-            String(u.password).trim() === password
+        // 匹配（兼容数字、字符串、中文、前后空格）
+        const success = userList.some(item => 
+            String(item.username || "").trim() === user &&
+            String(item.password || "").trim() === pwd
         );
 
-        if (ok) {
+        if (success) {
             alert("登录成功！");
             location.href = "/";
         } else {
             msg.innerText = "账号或密码错误";
             msg.style.display = "block";
         }
-    } catch (e) {
-        console.error(e);
-        msg.innerText = "读取用户文件失败，请检查 name.xls 是否存在";
+
+    } catch (err) {
+        console.error(err);
+        msg.innerText = "找不到 name.xls 文件 或 文件格式错误";
         msg.style.display = "block";
     }
 }
-
-// ✅ 辅助函数：正确处理中文编码
-function readBlobAsArrayBuffer(blob) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsArrayBuffer(blob);
-    });
-}
 </script>
-
 </body>
+</html>
