@@ -1,82 +1,264 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>班级登录</title>
-<style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
-    body{background:#f4f7ff;display:grid;place-items:center;height:100vh}
-    .login{background:white;padding:40px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.1);width:100%;max-width:400px}
-    h2{text-align:center;margin-bottom:24px}
-    input{width:100%;padding:14px;margin:8px 0;border:1px solid #ddd;border-radius:8px;font-size:16px}
-    button{width:100%;padding:14px;background:#0d6efd;color:white;border:none;border-radius:8px;font-size:16px;margin-top:10px;cursor:pointer}
-    button:hover{background:#0b5ed7}
-    #msg{color:red;text-align:center;margin-top:12px;display:none}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class10 班级登录</title>
+    <style>
+        /* 全局样式重置与基础设置 */
+        :root {
+            --primary-color: #0d6efd;
+            --primary-hover: #0b5ed7;
+            --error-color: #dc3545;
+            --bg-color: #f4f7ff;
+            --card-bg: #ffffff;
+            --border-color: #dddddd;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif; /* 适配中文显示 */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: grid;
+            place-items: center;
+            min-height: 100vh;
+            padding: 20px; /* 移动端适配 */
+        }
+
+        /* 登录卡片样式 */
+        .login-card {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-card__title {
+            text-align: center;
+            margin-bottom: 24px;
+            font-size: 22px;
+            color: #333;
+        }
+
+        /* 输入框样式 */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* 按钮样式 */
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .login-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* 提示信息样式 */
+        .error-msg {
+            color: var(--error-color);
+            text-align: center;
+            margin-top: 12px;
+            display: none;
+            font-size: 14px;
+        }
+
+        /* 隐藏的文件选择框 */
+        .file-input {
+            display: none;
+        }
+    </style>
 </head>
 <body>
+    <div class="login-card">
+        <h2 class="login-card__title">Class10 班级登录</h2>
+        <!-- 隐藏的Excel文件选择框（保留原有功能） -->
+        <input type="file" id="excelFile" class="file-input" accept=".xlsx,.xls">
+        <!-- 账号输入框 -->
+        <div class="form-group">
+            <input type="text" id="username" class="form-input" placeholder="账号">
+        </div>
+        <!-- 密码输入框 -->
+        <div class="form-group">
+            <input type="password" id="password" class="form-input" placeholder="密码">
+        </div>
+        <!-- 登录按钮 -->
+        <button id="loginButton" class="login-btn">登录</button>
+        <!-- 错误提示 -->
+        <div id="errorMsg" class="error-msg">账号或密码错误</div>
+    </div>
 
-<div class="login">
-    <h2>Class10 班级登录</h2>
-    <input type="file" id="excelFile" style="display:none;" accept=".xlsx,.xls">
-    <input type="text" id="user" placeholder="账号">
-    <input type="password" id="pwd" placeholder="密码">
-    <button onclick="login()">登录</button>
-    <div id="msg">账号或密码错误</div>
-</div>
+    <!-- 引入Excel处理库 -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script>
+        // 全局状态管理：存储用户列表
+        const appState = {
+            userList: []
+        };
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script>
-let userList = [];
+        // DOM元素缓存
+        const domElements = {
+            usernameInput: document.getElementById('username'),
+            passwordInput: document.getElementById('password'),
+            loginButton: document.getElementById('loginButton'),
+            errorMsg: document.getElementById('errorMsg'),
+            excelFileInput: document.getElementById('excelFile')
+        };
 
-// 页面加载时自动读取 name.xlsx（支持中文）
-window.onload = async function() {
-    try {
-        const response = await fetch("name.xlsx");
-        const data = await response.arrayBuffer();
-        const workbook = XLSX.read(data, {
-            type: "array",
-            codepage: 936,       // GBK 中文编码
-            cellText: false,
-            cellDates: true
-        });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        userList = XLSX.utils.sheet_to_json(sheet);
-        console.log("用户列表（已修复中文）：", userList);
-    } catch (e) {
-        console.log("未找到在线文件，将使用手动选择文件");
-    }
-};
+        /**
+         * 读取Excel文件并解析为用户列表（支持中文编码）
+         * @param {ArrayBuffer} data - Excel文件的ArrayBuffer数据
+         * @returns {Array} 解析后的用户列表
+         */
+        function parseExcelFile(data) {
+            try {
+                const workbook = XLSX.read(data, {
+                    type: 'array',
+                    codepage: 936, // 适配GBK中文编码
+                    cellText: false,
+                    cellDates: true
+                });
+                const sheetName = workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+                // 转换为JSON格式，确保中文正常显示
+                const userList = XLSX.utils.sheet_to_json(sheet);
+                console.log('解析后的用户列表（中文已适配）：', userList);
+                return userList;
+            } catch (error) {
+                console.error('Excel解析失败：', error);
+                return [];
+            }
+        }
 
-// 登录验证
-async function login() {
-    let user = document.getElementById("user").value.trim();
-    let pwd = document.getElementById("pwd").value.trim();
-    let msg = document.getElementById("msg");
-    msg.style.display = "none";
+        /**
+         * 加载远程Excel用户列表文件
+         */
+        async function loadRemoteUserList() {
+            try {
+                const response = await fetch('name.xlsx');
+                // 检查请求是否成功
+                if (!response.ok) throw new Error('文件请求失败');
+                
+                const data = await response.arrayBuffer();
+                appState.userList = parseExcelFile(data);
+            } catch (error) {
+                console.warn('远程Excel文件加载失败，将使用手动选择文件模式：', error);
+                appState.userList = [];
+            }
+        }
 
-    if (!user || !pwd) {
-        msg.innerText = "请输入账号和密码";
-        msg.style.display = "block";
-        return;
-    }
+        /**
+         * 验证账号密码是否匹配
+         * @param {string} username - 输入的账号
+         * @param {string} password - 输入的密码
+         * @returns {boolean} 匹配结果
+         */
+        function validateCredentials(username, password) {
+            // 空值校验
+            if (!username || !password) {
+                showErrorMsg('请输入账号和密码');
+                return false;
+            }
 
-    // 匹配账号密码（支持中文、数字、字符串）
-    const ok = userList.some(item => {
-        let name = String(item.username || item.账号 || "").trim();
-        let psw = String(item.password || item.密码 || "").trim();
-        return name === user && psw === pwd;
-    });
+            // 匹配账号密码（兼容不同字段名：username/账号、password/密码）
+            const isMatch = appState.userList.some(user => {
+                const userAccount = String(user.username || user.账号 || '').trim();
+                const userPwd = String(user.password || user.密码 || '').trim();
+                return userAccount === username && userPwd === password;
+            });
 
-    if (ok) {
-        alert("登录成功！");
-        location.href = "/";
-    } else {
-        msg.innerText = "账号或密码错误";
-        msg.style.display = "block";
-    }
-}
-</script>
+            if (!isMatch) {
+                showErrorMsg('账号或密码错误');
+                return false;
+            }
+
+            return true;
+        }
+
+        /**
+         * 显示错误提示信息
+         * @param {string} message - 提示文本
+         */
+        function showErrorMsg(message) {
+            domElements.errorMsg.textContent = message;
+            domElements.errorMsg.style.display = 'block';
+        }
+
+        /**
+         * 隐藏错误提示信息
+         */
+        function hideErrorMsg() {
+            domElements.errorMsg.style.display = 'none';
+        }
+
+        /**
+         * 登录处理逻辑
+         */
+        async function handleLogin() {
+            // 隐藏之前的错误提示
+            hideErrorMsg();
+            
+            // 获取并清洗输入值
+            const username = domElements.usernameInput.value.trim();
+            const password = domElements.passwordInput.value.trim();
+
+            // 验证账号密码
+            const isValid = validateCredentials(username, password);
+            if (!isValid) return;
+
+            // 登录成功处理
+            alert('登录成功！');
+            window.location.href = '/';
+        }
+
+        /**
+         * 初始化页面
+         */
+        function initApp() {
+            // 页面加载时加载远程Excel用户列表
+            loadRemoteUserList();
+            
+            // 绑定登录按钮点击事件
+            domElements.loginButton.addEventListener('click', handleLogin);
+            
+            // 绑定回车键登录
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') handleLogin();
+            });
+        }
+
+        // 页面加载完成后初始化应用
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
 </body>
 </html>
