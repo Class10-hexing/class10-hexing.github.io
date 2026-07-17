@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>班级官网 - 登录入口</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft Yahei", sans-serif;
+    }
+    body {
+      background: #f5f7fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .login-box {
+      background: #fff;
+      width: 420px;
+      padding: 35px 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+    }
+    .login-box h2 {
+      text-align: center;
+      color: #2d3748;
+      margin-bottom: 28px;
+    }
+    .item {
+      margin-bottom: 20px;
+    }
+    .item label {
+      display: block;
+      margin-bottom: 8px;
+      color: #4a5568;
+    }
+    .item input {
+      width: 100%;
+      height: 44px;
+      padding: 0 14px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+    .btn {
+      width: 100%;
+      height: 46px;
+      background: #2b6cb0;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .btn:hover {
+      background: #2c5282;
+    }
+    .tip {
+      margin-top: 16px;
+      font-size: 13px;
+      color: #718096;
+      line-height: 1.6;
+    }
+    .back-index {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: #2b6cb0;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>班级系统登录</h2>
+    <div class="item">
+      <label>姓名 / 管理员账号</label>
+      <input type="text" id="username" placeholder="请输入姓名或管理员账号">
+    </div>
+    <div class="item">
+      <label>密码</label>
+      <input type="password" id="pwd" placeholder="学生默认密码：123456">
+    </div>
+    <button class="btn" id="loginBtn">立即登录</button>
+    <p class="tip">
+      普通同学：输入姓名 + 密码123456<br>
+      管理员：使用专属账号密码登录，可进入后台配置面板
+    </p>
+    <a href="./index.html" class="back-index">返回首页</a>
+  </div>
+
+  <script src="./js/login.js"></script>
+</body>
+</html>
