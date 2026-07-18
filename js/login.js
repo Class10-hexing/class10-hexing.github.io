@@ -1,8 +1,8 @@
 // 班级登录核心配置：管理员账号 + 60名学生【姓名+独立密码】
 let SITE_CONFIG = {
   "admin": {
-    "account": "admin",
-    "password": "admin123"
+    "account": "付煜晨",
+    "password": "fu120422"
   },
   "studentList": [
     {"name": "陈俊汐", "pwd": "20241001"},
