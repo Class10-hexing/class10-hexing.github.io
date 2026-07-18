@@ -135,6 +135,11 @@ window.addEventListener('DOMContentLoaded', function(){
                         <li class="nav-item">
                             <a class="nav-link me-lg-3" href="#experience">学科老师</a>
                         </li>
+                    
+                        <!-- 仅管理员可见：后台配置按钮 -->
+                        <li class="nav-item d-none" id="adminConfigBtn">
+                            <button class="nav-link border-0 bg-transparent me-lg-3" onclick="ClassLogin.openConfigPanel()">后台配置</button>
+                        </li>
                         <!-- 右侧用户下拉菜单 -->
                         <li class="nav-item dropdown" id="userDropdownWrap">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" id="userNameShow">
@@ -146,11 +151,6 @@ window.addEventListener('DOMContentLoaded', function(){
                             <li><hr class="dropdown-divider"></li>
                             <li><button class="dropdown-item" onclick="ClassLogin.logout()">退出登录</button></li>
                         </ul>
-                    </li>
-                    
-                    <!-- 仅管理员可见：后台配置按钮 -->
-                    <li class="nav-item d-none" id="adminConfigBtn">
-                        <button class="nav-link border-0 bg-transparent me-lg-3" onclick="ClassLogin.openConfigPanel()">后台配置</button>
                     </li>
                     </ul>
             </div>
