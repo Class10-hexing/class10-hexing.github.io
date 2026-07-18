@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>扫雷</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+body{background:#f0f2f5;display:flex;flex-direction:column;align-items:center;padding:20px}
+#info{margin-bottom:12px;font-size:18px}
+#board{display:grid;grid-template-columns:repeat(16,24px);gap:1px;background:#999;padding:1px}
+.cell{width:24px;height:24px;background:#ccc;display:grid;place-items:center;font-weight:bold;cursor:pointer;user-select:none}
+.cell.open{background:#eee}
+.cell.mine{background:#f55}
+.cell.flag{background:#fc0}
+</style>
+</head>
+<body>
+<div id="info">剩余地雷：<span id="count">40</span> | 左键点开 右键插旗</div>
+<div id="board"></div>
+<script>
+const size=16,mineNum=40;
+let board=[],mineList=[],flag=0,gameOver=false;
+const $=s=>document.querySelector(s);
+// 初始化棋盘
+function init(){
+  $("#board").innerHTML="";gameOver=false;flag=0;$("#count").textContent=mineNum;
+  mineList=[];board=Array(size).fill().map(()=>Array(size).fill(0));
+  // 随机埋雷
+  let i=0;
+  while(i<mineNum){
+    let x=Math.floor(Math.random()*size),y=Math.floor(Math.random()*size);
+    if(board[y][x]!=-1){board[y][x]=-1;mineList.push([x,y]);i++}
+  }
+  // 计算周围雷数
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      if(board[y][x]==-1)continue;
+      let c=0;
+      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+        let nx=x+dx,ny=y+dy;
+        if(nx>=0&&nx<size&&ny>=0&&ny<size&&board[ny][nx]==-1)c++;
+      }
+      board[y][x]=c;
+    }
+  }
+  // 渲染格子
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      let div=document.createElement("div");
+      div.className="cell";
+      div.dataset.x=x;div.dataset.y=y;
+      // 左键点开
+      div.onclick=()=>openCell(x,y,div);
+      // 右键插旗
+      div.oncontextmenu=e=>{
+        e.preventDefault();
+        if(gameOver||div.classList.contains("open"))return;
+        if(div.classList.toggle("flag"))flag++;else flag--;
+        $("#count").textContent=mineNum-flag;
+      }
+      $("#board").append(div);
+    }
+  }
+}
+// 点开格子递归
+function openCell(x,y,el){
+  if(gameOver||el.classList.contains("open")||el.classList.contains("flag"))return;
+  el.classList.add("open");
+  let val=board[y][x];
+  if(val==-1){
+    gameOver=true;
+    alert("踩雷！游戏结束");
+    mineList.forEach(([mx,my])=>{
+      let cell=document.querySelector(`.cell[data-x="${mx}"][data-y="${my}"]`);
+      cell.classList.add("mine");
+    })
+    return;
+  }
+  if(val>0)el.textContent=val;
+  else{
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+      let nx=x+dx,ny=y+dy;
+      if(nx>=0&&nx<size&&ny>=0&&ny<size){
+        let ncell=document.querySelector(`.cell[data-x="${nx}"][data-y="${ny}"]`);
+        openCell(nx,ny,ncell);
+      }
+    }
+  }
+  // 胜利判定
+  let left=document.querySelectorAll(".cell:not(.open)").length;
+  if(left===mineNum){
+    gameOver=true;
+    alert("恭喜通关！");
+  }
+}
+init();
+</script>
+</body>
+</html>
