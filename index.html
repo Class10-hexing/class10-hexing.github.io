@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-cn">
 
 <head>
     <meta charset="utf-8" />
@@ -86,29 +86,31 @@
 </head>
 
 <script>
-window.onload = function(){
-    const loginData = ClassLogin.getLogin();
-    const liLogin = document.getElementById('li-login');
-    const liConfig = document.getElementById('li-config');
-    const liLogout = document.getElementById('li-logout');
+window.addEventListener('DOMContentLoaded', function(){
+    const loginInfo = ClassLogin.getLogin();
+    const userNameShow = document.getElementById('userNameShow');
+    const adminConfigBtn = document.getElementById('adminConfigBtn');
 
-    if(!loginData){
-        // 未登录：只显示登录
-        liLogin.style.display = 'block';
-        liConfig.style.display = 'none';
-        liLogout.style.display = 'none';
-    }else{
-        // 已登录：隐藏登录
-        liLogin.style.display = 'none';
-        liLogout.style.display = 'block';
-        // 仅管理员展示配置按钮
-        if(loginData.role === "admin"){
-            liConfig.style.display = 'block';
-        }else{
-            liConfig.style.display = 'none';
+    if (!loginInfo) {
+        // 未登录：显示文字为登录，点击跳转到登录页
+        userNameShow.innerText = '登录';
+        userNameShow.setAttribute('href', './login.html');
+        userNameShow.classList.remove('dropdown-toggle');
+        adminConfigBtn.classList.add('d-none');
+    } else {
+        // 已登录：显示当前登录姓名，开启下拉菜单
+        userNameShow.innerText = loginInfo.userName;
+        userNameShow.removeAttribute('href');
+        userNameShow.classList.add('dropdown-toggle');
+
+        // 只有管理员显示后台配置按钮
+        if (loginInfo.role === 'admin') {
+            adminConfigBtn.classList.remove('d-none');
+        } else {
+            adminConfigBtn.classList.add('d-none');
         }
     }
-}
+})
 </script>
     
 <body id="page-top">
@@ -133,16 +135,23 @@ window.onload = function(){
                         <li class="nav-item">
                             <a class="nav-link me-lg-3" href="#experience">学科老师</a>
                         </li>
-                        <!-- 登录功能按钮 绑定ID -->
-                        <li class="nav-item" id="li-login">
-                            <a id="btn-login" class="nav-link me-lg-3" href="./login.html">登录</a>
-                        </li>
-                        <li class="nav-item" id="li-config">
-                            <button id="btn-config" class="nav-link border-0 bg-transparent me-lg-3" onclick="ClassLogin.openConfigPanel()">后台配置</button>
-                        </li>
-                        <li class="nav-item" id="li-logout">
-                            <button id="btn-logout" class="nav-link border-0 bg-transparent" onclick="ClassLogin.logout()">退出登录</button>
-                        </li>
+                        <!-- 右侧用户下拉菜单 -->
+                        <li class="nav-item dropdown" id="userDropdownWrap">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" id="userNameShow">
+                            登录
+                            </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#">游戏中心</a></li>
+                            <li><a class="dropdown-item" href="#">留言墙</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><button class="dropdown-item" onclick="ClassLogin.logout()">退出登录</button></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- 仅管理员可见：后台配置按钮 -->
+                    <li class="nav-item d-none" id="adminConfigBtn">
+                        <button class="nav-link border-0 bg-transparent me-lg-3" onclick="ClassLogin.openConfigPanel()">后台配置</button>
+                    </li>
                     </ul>
             </div>
         </div>
