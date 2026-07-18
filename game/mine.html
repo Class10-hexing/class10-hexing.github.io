@@ -2,25 +2,32 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>扫雷</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
-body{background:#f0f2f5;display:flex;flex-direction:column;align-items:center;padding:20px}
-#info{margin-bottom:12px;font-size:18px}
-#board{display:grid;grid-template-columns:repeat(16,24px);gap:1px;background:#999;padding:1px}
-.cell{width:24px;height:24px;background:#ccc;display:grid;place-items:center;font-weight:bold;cursor:pointer;user-select:none}
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui, sans-serif;}
+body{background:#f0f2f5;display:flex;flex-direction:column;align-items:center;padding:15px 8px;min-height:100vh;}
+#info{margin-bottom:12px;font-size:16px;text-align:center;line-height:1.5;}
+#board{display:grid;grid-template-columns:repeat(16, minmax(18px, 24px));gap:1px;background:#999;padding:1px;}
+.cell{width:100%;aspect-ratio:1/1;background:#ccc;display:grid;place-items:center;font-weight:bold;cursor:pointer;user-select:none;font-size:12px;}
 .cell.open{background:#eee}
 .cell.mine{background:#f55}
 .cell.flag{background:#fc0}
+.back-box{margin-top:20px;}
+.back-index{padding:8px 16px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;}
 </style>
 </head>
 <body>
-<div id="info">剩余地雷：<span id="count">40</span> | 左键点开 右键插旗</div>
+<div id="info">剩余地雷：<span id="count">40</span><br>电脑：左键点开 右键插旗 | 手机：单击点开 长按标记旗子</div>
 <div id="board"></div>
+<div class="back-box">
+    <a href="./game-index.html" class="back-index">← 返回游戏大厅</a>
+</div>
 <script>
 const size=16,mineNum=40;
 let board=[],mineList=[],flag=0,gameOver=false;
 const $=s=>document.querySelector(s);
+let longPressTimer = null;
 // 初始化棋盘
 function init(){
   $("#board").innerHTML="";gameOver=false;flag=0;$("#count").textContent=mineNum;
@@ -49,19 +56,41 @@ function init(){
       let div=document.createElement("div");
       div.className="cell";
       div.dataset.x=x;div.dataset.y=y;
-      // 左键点开
+
+      // 鼠标左键点击打开
       div.onclick=()=>openCell(x,y,div);
-      // 右键插旗
+
+      // 电脑右键插旗
       div.oncontextmenu=e=>{
         e.preventDefault();
-        if(gameOver||div.classList.contains("open"))return;
-        if(div.classList.toggle("flag"))flag++;else flag--;
-        $("#count").textContent=mineNum-flag;
+        toggleFlag(div);
       }
+
+      // 手机长按标记旗子
+      div.addEventListener('touchstart', () => {
+        longPressTimer = setTimeout(() => {
+          toggleFlag(div);
+        }, 400);
+      });
+      div.addEventListener('touchend', () => {
+        clearTimeout(longPressTimer);
+      });
+      div.addEventListener('touchmove', () => {
+        clearTimeout(longPressTimer);
+      });
+
       $("#board").append(div);
     }
   }
 }
+
+// 切换插旗状态
+function toggleFlag(el){
+  if(gameOver||el.classList.contains("open"))return;
+  if(el.classList.toggle("flag"))flag++;else flag--;
+  $("#count").textContent=mineNum-flag;
+}
+
 // 点开格子递归
 function openCell(x,y,el){
   if(gameOver||el.classList.contains("open")||el.classList.contains("flag"))return;
@@ -90,7 +119,7 @@ function openCell(x,y,el){
   let left=document.querySelectorAll(".cell:not(.open)").length;
   if(left===mineNum){
     gameOver=true;
-    alert("恭喜通关！");
+    alert("恭喜通关扫雷！");
   }
 }
 init();
