@@ -1,11 +1,11 @@
-
+<!DOCTYPE HTML>
 <HTML>
 <HEAD>
- 
-<title>Tetris</title>
-<script>window.resizeTo(410,450)</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>俄罗斯方块</title>
+<script>window.resizeTo(410,530)</script>
 <style>
-<!--
 .MB
 {
     BACKGROUND-COLOR: firebrick;
@@ -35,10 +35,40 @@
     BORDER-TOP: deepskyblue thin solid;
     CURSOR: default
 }
--->
+body{margin:0;padding:10px;box-sizing:border-box;}
+/* 移动端虚拟按键布局 */
+.control-panel{
+    margin-top:12px;
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap:8px;
+    max-width:320px;
+}
+.ctrl-btn{
+    padding:12px 5px;
+    font-size:16px;
+    border:none;
+    background:#2478f5;
+    color:#fff;
+    border-radius:6px;
+}
+.btn-rotate{
+    grid-column: 2 / 3;
+}
+.btn-down{
+    grid-column: 2 / 3;
+}
+.back-btn{
+    margin-top:10px;
+    padding:7px 14px;
+    border:none;
+    background:#666;
+    color:#fff;
+    border-radius:5px;
+    cursor:pointer;
+}
 </style>
 <script>
-<!--
 var BX=new Array(4);
 var BY=new Array(4);
 var PX=new Array(4);
@@ -46,7 +76,46 @@ var PY=new Array(4);
 var mTimer
 var firstView
 var gameState = 0;
- 
+
+// 左移
+function moveLeft(){
+    if(gameState !== 1) return;
+    for(i=0;i<4;i++)if(BX[i]==0)return;
+    for(i=0;i<4;i++)if(getClass(BX[i]-1,BY[i])=="SB")return;
+    for(i=0;i<4;i++)setClass(BX[i],BY[i],"BK");
+    for(i=0;i<4;i++)BX[i]=BX[i]-1;
+    for(i=0;i<4;i++)setClass(BX[i],BY[i],"MB");
+}
+// 右移
+function moveRight(){
+    if(gameState !== 1) return;
+    for(i=0;i<4;i++)if(BX[i]==9)return;
+    for(i=0;i<4;i++)if(getClass(BX[i]+1,BY[i])=="SB")return;
+    for(i=0;i<4;i++)setClass(BX[i],BY[i],"BK");
+    for(i=0;i<4;i++)BX[i]=BX[i]+1;
+    for(i=0;i<4;i++)setClass(BX[i],BY[i],"MB");
+}
+// 旋转
+function moveRotate(){
+    if(gameState !== 1) return;
+    var preMBarX=new Array(4);
+    var preMBarY=new Array(4);
+    var cx=Math.round((BX[0]+BX[1]+BX[2]+BX[3])/4);
+    var cy=Math.round((BY[0]+BY[1]+BY[2]+BY[3])/4);
+    for(i=0;i<4;i++){
+        preMBarX[i]=Math.round(cx-cy+BY[i]);
+        preMBarY[i]=Math.round(cx+cy-BX[i]);
+        if(preMBarX[i]<0 || preMBarX[i]>9 || preMBarY[i]<0 || preMBarY[i]>15)return;
+        if(getClass(preMBarX[i],preMBarY[i])=="SB")return;
+    }
+    for(i=0;i<4;i++)setClass(BX[i],BY[i],"BK");
+    for(i=0;i<4;i++){
+        BX[i]=preMBarX[i];
+        BY[i]=preMBarY[i];
+    }
+    for(i=0;i<4;i++)setClass(BX[i],BY[i],"MB");
+}
+
 function beginGame()
 {
     gameState=0;
@@ -64,49 +133,18 @@ function beginGame()
     window.clearInterval(mTimer);
     mTimer=window.setInterval("moveBar()",outTime);
 }
- 
+
 function keyControl()
 {
     if(gameState!=1)return;
     switch(event.keyCode){
-        case 37:{    //left
-            for(i=0;i<4;i++)if(BX[i]==0)return;
-            for(i=0;i<4;i++)if(getClass(BX[i]-1,BY[i])=="SB")return;
-            for(i=0;i<4;i++)setClass(BX[i],BY[i],"BK");
-            for(i=0;i<4;i++)BX[i]=BX[i]-1;
-            for(i=0;i<4;i++)setClass(BX[i],BY[i],"MB");
-            break;}
-        case 38:{    //up
-            var preMBarX=new Array(4);
-            var preMBarY=new Array(4);
-            var cx=Math.round((BX[0]+BX[1]+BX[2]+BX[3])/4);
-            var cy=Math.round((BY[0]+BY[1]+BY[2]+BY[3])/4);
-            for(i=0;i<4;i++){
-                preMBarX[i]=Math.round(cx-cy+BY[i]);
-                preMBarY[i]=Math.round(cx+cy-BX[i]);
-                if(preMBarX[i]<0 || preMBarX[i]>9 || preMBarY[i]<0 || preMBarY[i]>15)return;
-                if(getClass(preMBarX[i],preMBarY[i])=="SB")return;
-            }
-            for(i=0;i<4;i++)setClass(BX[i],BY[i],"BK");
-            for(i=0;i<4;i++){
-                BX[i]=preMBarX[i];
-                BY[i]=preMBarY[i];
-            }
-            for(i=0;i<4;i++)setClass(BX[i],BY[i],"MB");
-            break;}
-        case 39:{    //right
-            for(i=0;i<4;i++)if(BX[i]==9)return;
-            for(i=0;i<4;i++)if(getClass(BX[i]+1,BY[i])=="SB")return;
-            for(i=0;i<4;i++)setClass(BX[i],BY[i],"BK");
-            for(i=0;i<4;i++)BX[i]=BX[i]+1;
-            for(i=0;i<4;i++)setClass(BX[i],BY[i],"MB");
-            break;}
-        case 40:{    //down
-            moveBar();
-            break;}
+        case 37: moveLeft(); break;
+        case 38: moveRotate(); break;
+        case 39: moveRight(); break;
+        case 40: moveBar(); break;
     }
 }
- 
+
 function delLine()
 {
     for(i=0;i<4;i++)setClass(BX[i],BY[i],"SB");
@@ -129,15 +167,15 @@ function delLine()
     randBar();
     speed=Math.floor(score/3000)+1;
     outTime=1100-speed*100;
-    scoreBar.innerHTML="Score : " + score;
-    speedBar.innerHTML="Speed : " + speed;
+    scoreBar.innerHTML="得分：" + score;
+    speedBar.innerHTML="速度：" + speed;
     window.clearInterval(mTimer);
     mTimer=window.setInterval("moveBar()",outTime);
 }
- 
+
 function getClass(x,y){return GameBar.children[y].children[x].className;}
 function setClass(x,y,cName){GameBar.children[y].children[x].className=cName;}
- 
+
 function moveBar()
 {
     if(gameState!=1)return;
@@ -153,25 +191,25 @@ function moveBar()
     for(i=0;i<4;i++)BY[i]=BY[i]+1;
     for(i=0;i<4;i++)setClass(BX[i],BY[i],"MB");
 }
- 
+
 function pauseGame()
 {
     if(gameState==0)return;
-    if(event.srcElement.value=="Pause"){
+    if(event.srcElement.value=="暂停"){
         gameState=2;
-        event.srcElement.value="Continue";
+        event.srcElement.value="继续";
         window.clearInterval(mTimer);
     }
     else{
         gameState=1;
-        event.srcElement.value="Pause";
+        event.srcElement.value="暂停";
         mTimer=window.setInterval("moveBar()",outTime);
     }
 }
- 
+
 function fMnu(){return false;}
 document.oncontextmenu=fMnu;
- 
+
 function preview()
 {
     if(previewWnd.style.display!="none")
@@ -179,11 +217,11 @@ function preview()
     else
         previewWnd.style.display="block";
 }
- 
+
 function replayGame()
 {
     if(gameState!=1)return;
-    if(!confirm("Really want to re-start the game?"))return;
+    if(!confirm("确定要重新开始游戏吗？"))return;
     gameState=0;
     window.clearInterval(mTimer);
     beginGame();
@@ -198,204 +236,64 @@ function randBar()
         }
     switch(randNum){
         case 1:{
-            PX[0]=4;
-            PY[0]=0;
-            PX[1]=4;
-            PY[1]=1;
-            PX[2]=5;
-            PY[2]=1;
-            PX[3]=6;
-            PY[3]=1;
+            PX[0]=4;PY[0]=0;PX[1]=4;PY[1]=1;PX[2]=5;PY[2]=1;PX[3]=6;PY[3]=1;
             break;}
         case 2:{
-            PX[0]=4;
-            PY[0]=0;
-            PX[1]=5;
-            PY[1]=0;
-            PX[2]=4;
-            PY[2]=1;
-            PX[3]=4;
-            PY[3]=2;
+            PX[0]=4;PY[0]=0;PX[1]=5;PY[1]=0;PX[2]=4;PY[2]=1;PX[3]=4;PY[3]=2;
             break;}
         case 3:{
-            PX[0]=4;
-            PY[0]=0;
-            PX[1]=5;
-            PY[1]=0;
-            PX[2]=6;
-            PY[2]=0;
-            PX[3]=6;
-            PY[3]=1;
+            PX[0]=4;PY[0]=0;PX[1]=5;PY[1]=0;PX[2]=6;PY[2]=0;PX[3]=6;PY[3]=1;
             break;}
         case 4:{
-            PX[0]=5;
-            PY[0]=0;
-            PX[1]=5;
-            PY[1]=1;
-            PX[2]=5;
-            PY[2]=2;
-            PX[3]=4;
-            PY[3]=2;
+            PX[0]=5;PY[0]=0;PX[1]=5;PY[1]=1;PX[2]=5;PY[2]=2;PX[3]=4;PY[3]=2;
             break;}
         case 5:{
-            PX[0]=6;
-            PY[0]=0;
-            PX[1]=6;
-            PY[1]=1;
-            PX[2]=4;
-            PY[2]=1;
-            PX[3]=5;
-            PY[3]=1;
+            PX[0]=6;PY[0]=0;PX[1]=6;PY[1]=1;PX[2]=4;PY[2]=1;PX[3]=5;PY[3]=1;
             break;}
         case 6:{
-            PX[0]=4;
-            PY[0]=0;
-            PX[1]=4;
-            PY[1]=1;
-            PX[2]=4;
-            PY[2]=2;
-            PX[3]=5;
-            PY[3]=2;
+            PX[0]=4;PY[0]=0;PX[1]=4;PY[1]=1;PX[2]=4;PY[2]=2;PX[3]=5;PY[3]=2;
             break;}
         case 7:{
-            PX[0]=4;
-            PY[0]=0;
-            PX[1]=4;
-            PY[1]=1;
-            PX[2]=5;
-            PY[2]=0;
-            PX[3]=6;
-            PY[3]=0;
+            PX[0]=4;PY[0]=0;PX[1]=4;PY[1]=1;PX[2]=5;PY[2]=0;PX[3]=6;PY[3]=0;
             break;}
         case 8:{
-            PX[0]=4;
-            PY[0]=0;
-            PX[1]=5;
-            PY[1]=0;
-            PX[2]=5;
-            PY[2]=1;
-            PX[3]=5;
-            PY[3]=2;
+            PX[0]=4;PY[0]=0;PX[1]=5;PY[1]=0;PX[2]=5;PY[2]=1;PX[3]=5;PY[3]=2;
             break;}
         case 9:{
-            PX[0]=4;
-            PY[0]=0;
-            PX[1]=5;
-            PY[1]=0;
-            PX[2]=5;
-            PY[2]=1;
-            PX[3]=6;
-            PY[3]=1;
+            PX[0]=4;PY[0]=0;PX[1]=5;PY[1]=0;PX[2]=5;PY[2]=1;PX[3]=6;PY[3]=1;
             break;}
         case 10:{
-            PX[0]=5;
-            PY[0]=0;
-            PX[1]=5;
-            PY[1]=1;
-            PX[2]=4;
-            PY[2]=1;
-            PX[3]=4;
-            PY[3]=2;
+            PX[0]=5;PY[0]=0;PX[1]=5;PY[1]=1;PX[2]=4;PY[2]=1;PX[3]=4;PY[3]=2;
             break;}
         case 11:{
-            PX[0]=4;
-            PY[0]=1;
-            PX[1]=5;
-            PY[1]=1;
-            PX[2]=5;
-            PY[2]=0;
-            PX[3]=6;
-            PY[3]=0;
+            PX[0]=4;PY[0]=1;PX[1]=5;PY[1]=1;PX[2]=5;PY[2]=0;PX[3]=6;PY[3]=0;
             break;}
         case 12:{
-            PX[0]=4;
-            PY[0]=0;
-            PX[1]=4;
-            PY[1]=1;
-            PX[2]=5;
-            PY[2]=1;
-            PX[3]=5;
-            PY[3]=2;
+            PX[0]=4;PY[0]=0;PX[1]=4;PY[1]=1;PX[2]=5;PY[2]=1;PX[3]=5;PY[3]=2;
             break;}
         case 13:{
-            PX[0]=4;
-            PY[0]=0;
-            PX[1]=5;
-            PY[1]=0;
-            PX[2]=6;
-            PY[2]=0;
-            PX[3]=5;
-            PY[3]=1;
+            PX[0]=4;PY[0]=0;PX[1]=5;PY[1]=0;PX[2]=6;PY[2]=0;PX[3]=5;PY[3]=1;
             break;}
         case 14:{
-            PX[0]=4;
-            PY[0]=0;
-            PX[1]=4;
-            PY[1]=1;
-            PX[2]=4;
-            PY[2]=2;
-            PX[3]=5;
-            PY[3]=1;
+            PX[0]=4;PY[0]=0;PX[1]=4;PY[1]=1;PX[2]=4;PY[2]=2;PX[3]=5;PY[3]=1;
             break;}
         case 15:{
-            PX[0]=5;
-            PY[0]=0;
-            PX[1]=5;
-            PY[1]=1;
-            PX[2]=4;
-            PY[2]=1;
-            PX[3]=6;
-            PY[3]=1;
+            PX[0]=5;PY[0]=0;PX[1]=5;PY[1]=1;PX[2]=4;PY[2]=1;PX[3]=6;PY[3]=1;
             break;}
         case 16:{
-            PX[0]=5;
-            PY[0]=0;
-            PX[1]=5;
-            PY[1]=1;
-            PX[2]=5;
-            PY[2]=2;
-            PX[3]=4;
-            PY[3]=1;
+            PX[0]=5;PY[0]=0;PX[1]=5;PY[1]=1;PX[2]=5;PY[2]=2;PX[3]=4;PY[3]=1;
             break;}
         case 17:{
-            PX[0]=4;
-            PY[0]=0;
-            PX[1]=5;
-            PY[1]=0;
-            PX[2]=4;
-            PY[2]=1;
-            PX[3]=5;
-            PY[3]=1;
+            PX[0]=4;PY[0]=0;PX[1]=5;PY[1]=0;PX[2]=4;PY[2]=1;PX[3]=5;PY[3]=1;
             break;}
         case 18:{
-            PX[0]=4;
-            PY[0]=0;
-            PX[1]=5;
-            PY[1]=0;
-            PX[2]=4;
-            PY[2]=1;
-            PX[3]=5;
-            PY[3]=1;
+            PX[0]=4;PY[0]=0;PX[1]=5;PY[1]=0;PX[2]=4;PY[2]=1;PX[3]=5;PY[3]=1;
             break;}
         case 19:{
-            PX[0]=3;
-            PY[0]=0;
-            PX[1]=4;
-            PY[1]=0;
-            PX[2]=5;
-            PY[2]=0;
-            PX[3]=6;
-            PY[3]=0;
+            PX[0]=3;PY[0]=0;PX[1]=4;PY[1]=0;PX[2]=5;PY[2]=0;PX[3]=6;PY[3]=0;
             break;}
         case 20:{
-            PX[0]=5;
-            PY[0]=0;
-            PX[1]=5;
-            PY[1]=1;
-            PX[2]=5;
-            PY[2]=2;
-            PX[3]=5;
-            PY[3]=3;
+            PX[0]=5;PY[0]=0;PX[1]=5;PY[1]=1;PX[2]=5;PY[2]=2;PX[3]=5;PY[3]=3;
             break;}
     }
     if(firstView){
@@ -411,7 +309,7 @@ function randBar()
     for(i=0;i<4;i++)previewBar.children[PY[i]].children[PX[i]-3].className="MB";
     for(i=0;i<4;i++){
         if(getClass(BX[i],BY[i])!="BK"){
-            alert("Game Over!");
+            alert("游戏结束！");
             window.clearInterval(mTimer);
             Play.disabled=false;
             gameState=0;
@@ -420,45 +318,66 @@ function randBar()
     }
     for(i=0;i<4;i++)setClass(BX[i],BY[i],"MB");
 }
-// -->
 </script>
 </HEAD>
- 
+
 <BODY bgcolor="#EAF0F8" onkeydown="return keyControl();" topmargin="10" leftmargin="10" rightmargin="10" bottommargin="0" scroll=no>
 <table border="0" width="100%" cellspacing="0" cellpadding="0" height="100%"><tr><td width="100%" height="100%" align="center">
 <table cellspacing=2 cellpadding=0 class=gt border=0 bordercolor="#EAF0F8" bgcolor="#EAF0F8">
 <tr>
 <td valign="top">
-    <table cellspacing=0 cellpadding=0 class=gt border=1 bordercolor="#EAF0F8" style="">
+    <table cellspacing=0 cellpadding=0 class=gt border=1 bordercolor="#EAF0F8">
     <Tbody id=GameBar>
-    <tr><td nowrap class=BK> </td><td nowrap class=BK> </td><td nowrap class=BK> </td><td nowrap class=BK> </td><td nowrap class=BK> </td><td nowrap class=BK>
-    </td><td nowrap class=BK> </td><td nowrap class=BK> </td><td nowrap class=BK> </td><td nowrap class=BK> </td></tr><tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK>
-    </td><td class=BK> </td><td class=BK> </td></tr><tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr><tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr><tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK>
-    </td><td class=BK> </td><td class=BK> </td></tr><tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr><tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr><tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK>
-    </td><td class=BK> </td><td class=BK> </td></tr><tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr><tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr><tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK>
-    </td><td class=BK> </td><td class=BK> </td></tr><tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr><tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr><tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK>
-    </td><td class=BK> </td><td class=BK> </td></tr><tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr><tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
+    <tr><td nowrap class=BK> </td><td nowrap class=BK> </td><td nowrap class=BK> </td><td nowrap class=BK> </td><td nowrap class=BK> </td><td nowrap class=BK> </td><td nowrap class=BK> </td><td nowrap class=BK> </td><td nowrap class=BK> </td><td nowrap class=BK> </td></tr>
+    <tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
+    <tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
+    <tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
+    <tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
+    <tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
+    <tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
+    <tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
+    <tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
+    <tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
+    <tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
+    <tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
+    <tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
+    <tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
+    <tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
+    <tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
     </tbody>
     </table>
+
+    <!-- 触屏方向按键 -->
+    <div class="control-panel">
+        <button class="ctrl-btn" onclick="moveLeft()">← 左移</button>
+        <button class="ctrl-btn btn-rotate" onclick="moveRotate()">↑ 旋转</button>
+        <button class="ctrl-btn" onclick="moveRight()">右移 →</button>
+        <button class="ctrl-btn btn-down" onclick="moveBar()">↓ 下落</button>
+    </div>
+    <!-- 返回大厅按钮 -->
+    <button class="back-btn" onclick="location.href='./hall.html'">返回游戏大厅</button>
 </td>
 <td valign="top" align="center" style="padding: 10 10 0 10" bgcolor="#466285">
     <table cellspacing=0 cellpadding=0 border=0>
-    <tr><td><font size=5 color=red face=consolas>Tetris</font></td></tr>
+    <tr><td><font size=5 color=red face=consolas>俄罗斯方块</font></td></tr>
     </table>
     <table id="previewWnd" cellspacing=0 cellpadding=0 class=gt border=1 bordercolor="#EAF0F8" bgcolor="#EAF0F8" style="margin-top:15">
     <Tbody id="previewBar">
-    <tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr><tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr><tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr><tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
+    <tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
+    <tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
+    <tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
+    <tr><td class=BK> </td><td class=BK> </td><td class=BK> </td><td class=BK> </td></tr>
     </tbody>
     </table>
     <table cellspacing=3 cellpadding=0 border=0 style="margin-top:15">
-        <tr><td><input type=button id="Play" style="font-family:Tahoma; font-size:9pt; width:100px" value="Play" onclick="return beginGame();"></td></tr>
-        <tr><td><input type=button id="Pause" style="font-family:Tahoma; font-size:9pt; width:100px" value="Pause" onclick="return pauseGame();"></td></tr>
-        <tr><td><input type=button id="Preview" style="font-family:Tahoma; font-size:9pt; width:100px" value="Preview" onclick="preview();"></td></tr>
-        <tr><td><input type=button id="Replay" style="font-family:Tahoma; font-size:9pt; width:100px" value="Replay" onclick="replayGame();"></td></tr>
+        <tr><td><input type=button id="Play" style="font-family:Tahoma; font-size:9pt; width:100px" value="开始游戏" onclick="return beginGame();"></td></tr>
+        <tr><td><input type=button id="Pause" style="font-family:Tahoma; font-size:9pt; width:100px" value="暂停" onclick="return pauseGame();"></td></tr>
+        <tr><td><input type=button id="Preview" style="font-family:Tahoma; font-size:9pt; width:100px" value="显示预览" onclick="preview();"></td></tr>
+        <tr><td><input type=button id="Replay" style="font-family:Tahoma; font-size:9pt; width:100px" value="重新开局" onclick="replayGame();"></td></tr>
     </table>
     <table cellspacing=3 cellpadding=0 border=0 style="font-family:Tahoma; font-size:9pt; font-weight: bold; margin-top:10">
-        <tr><td id=scoreBar style="color:#FFFFFF">Score : 0</td></tr>
-        <tr><td id=speedBar style="color:#FFFFFF">Speed : 1</td></tr>
+        <tr><td id=scoreBar style="color:#FFFFFF">得分：0</td></tr>
+        <tr><td id=speedBar style="color:#FFFFFF">速度：1</td></tr>
     </table>
 </td>
 </tr>
@@ -473,6 +392,4 @@ function unSel()
     window.setTimeout("unSel()",100);
 }
 unSel();
- <button class="back-btn" onclick="location.href='./hall.html'">返回游戏大厅</button>
- 
 </script>
