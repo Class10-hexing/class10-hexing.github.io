@@ -87,26 +87,25 @@
 
 <script>
 window.onload = function(){
-    const loginInfo = ClassLogin.getLogin();
-    const navItems = document.querySelectorAll('#navbarResponsive .nav-item');
-    let loginBtn = null, cfgBtn = null, logoutBtn = null;
-    navItems.forEach(item=>{
-        let txt = item.innerText.trim();
-        if(txt === '登录') loginBtn = item;
-        if(txt === '后台配置') cfgBtn = item;
-        if(txt === '退出登录') logoutBtn = item;
-    })
+    const loginData = ClassLogin.getLogin();
+    const liLogin = document.getElementById('li-login');
+    const liConfig = document.getElementById('li-config');
+    const liLogout = document.getElementById('li-logout');
 
-    if(!loginInfo){
-        // 未登录：只留登录，隐藏配置、退出
-        cfgBtn.style.display = 'none';
-        logoutBtn.style.display = 'none';
+    if(!loginData){
+        // 未登录：只显示登录
+        liLogin.style.display = 'block';
+        liConfig.style.display = 'none';
+        liLogout.style.display = 'none';
     }else{
         // 已登录：隐藏登录
-        loginBtn.style.display = 'none';
-        if(loginInfo.type !== 'admin'){
-            // 学生登录：隐藏后台配置
-            cfgBtn.style.display = 'none';
+        liLogin.style.display = 'none';
+        liLogout.style.display = 'block';
+        // 仅管理员展示配置按钮
+        if(loginData.role === "admin"){
+            liConfig.style.display = 'block';
+        }else{
+            liConfig.style.display = 'none';
         }
     }
 }
@@ -125,26 +124,26 @@ window.onload = function(){
             </button>
             <div class="collapse navbar-collapse" id="navbarResponsive">
                     <ul class="navbar-nav ms-auto me-4 my-3 my-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link me-lg-3" href="#home">班级概貌</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link me-lg-3" href="#awards">班级荣誉</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link me-lg-3" href="#experience">学科老师</a>
-                    </li>
-                    <!-- 登录功能按钮 -->
-                    <li class="nav-item">
-                        <a class="nav-link me-lg-3" href="./login.html">登录</a>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link border-0 bg-transparent me-lg-3" onclick="ClassLogin.openConfigPanel()">后台配置</button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link border-0 bg-transparent" onclick="ClassLogin.logout()">退出登录</button>
-                    </li>
-                </ul>
+                        <li class="nav-item">
+                            <a class="nav-link me-lg-3" href="#home">班级概貌</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link me-lg-3" href="#awards">班级荣誉</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link me-lg-3" href="#experience">学科老师</a>
+                        </li>
+                        <!-- 登录功能按钮 绑定ID -->
+                        <li class="nav-item" id="li-login">
+                            <a id="btn-login" class="nav-link me-lg-3" href="./login.html">登录</a>
+                        </li>
+                        <li class="nav-item" id="li-config">
+                            <button id="btn-config" class="nav-link border-0 bg-transparent me-lg-3" onclick="ClassLogin.openConfigPanel()">后台配置</button>
+                        </li>
+                        <li class="nav-item" id="li-logout">
+                            <button id="btn-logout" class="nav-link border-0 bg-transparent" onclick="ClassLogin.logout()">退出登录</button>
+                        </li>
+                    </ul>
             </div>
         </div>
     </nav>
