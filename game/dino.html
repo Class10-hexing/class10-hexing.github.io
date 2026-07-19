@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Chrome 霸王龙跳跃</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:monospace}
+body{background:#fff;text-align:center;overflow:hidden}
+.info-bar{
+    padding:12px 0;
+    font-size:22px;
+}
+.tip-text{
+    font-size:14px;color:#555;margin-bottom:8px;
+}
+#game-area{
+    width:100vw;
+    height:220px;
+    border-bottom:2px solid #222;
+    position:relative;
+    overflow:hidden;
+    font-size:36px;
+    line-height:60px;
+}
+#dino{
+    position:absolute;
+    bottom:0;
+    left:40px;
+    user-select:none;
+    transform: scaleX(-1);
+}
+.cactus{
+    position:absolute;
+    bottom:0;
+    user-select:none;
+}
+.back-btn{
+    margin-top:12px;
+    padding:7px 18px;
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:14px;
+}
+</style>
+</head>
+<body>
+<div class="info-bar">分数：<span id="score">0</span></div>
+<div class="tip-text">电脑按空格开始/跳跃 | 手机点击游戏区域操作</div>
+<div id="game-area">
+    <div id="dino">🦖</div>
+</div>
+<button class="back-btn" onclick="location.href='./hall.html'">返回游戏大厅</button>
+
+<script>
+const gameArea = document.getElementById('game-area');
+const dinoEl = document.getElementById('dino');
+const scoreEl = document.getElementById('score');
+
+let gameRunning = false;
+let score = 0;
+let posY = 0;
+let velocityY = 0;
+const gravity = 0.7;
+const jumpForce = 15;
+let obstacleSpeed = 6;
+let obstacleList = [];
+let gameFrame;
+let obstacleSpawnTimer;
+
+function doJump() {
+    if (!gameRunning) startGame();
+    if (posY === 0) {
+        velocityY = jumpForce;
+    }
+}
+
+function physicsUpdate() {
+    velocityY -= gravity;
+    posY += velocityY;
+
+    if (posY <= 0) {
+        posY = 0;
+        velocityY = 0;
+    }
+    dinoEl.style.bottom = posY + 'px';
+}
+
+// 随机三种仙人掌样式，大小不一样
+function spawnCactus() {
+    if (!gameRunning) return;
+    const cac = document.createElement('div');
+    cac.className = 'cactus';
+    // 随机单株/双株/矮株仙人掌
+    const cactusType = Math.floor(Math.random() * 3);
+    if(cactusType === 0) cac.textContent = '🌵';
+    else if(cactusType === 1) cac.textContent = '🌵🌵';
+    else {
+        cac.textContent = '🌵';
+        cac.style.fontSize = '28px';
+    }
+    cac.style.left = gameArea.clientWidth + 'px';
+    gameArea.appendChild(cac);
+    obstacleList.push(cac);
+}
+
+function gameTick() {
+    physicsUpdate();
+    score += 1;
+    scoreEl.textContent = score;
+    obstacleSpeed = 6 + Math.floor(score / 800) * 1.2;
+
+    obstacleList.forEach((item, idx) => {
+        let leftVal = parseFloat(item.style.left);
+        leftVal -= obstacleSpeed;
+        item.style.left = leftVal + 'px';
+
+        if (leftVal < -80) {
+            item.remove();
+            obstacleList.splice(idx, 1);
+        }
+
+        const dinoBox = dinoEl.getBoundingClientRect();
+        const cacBox = item.getBoundingClientRect();
+        if (
+            dinoBox.right > cacBox.left + 6 &&
+            dinoBox.left < cacBox.right - 6 &&
+            dinoBox.bottom > cacBox.top + 3
+        ) {
+            gameOver();
+        }
+    });
+}
+
+function startGame() {
+    if (gameRunning) return;
+    gameRunning = true;
+    score = 0;
+    obstacleSpeed = 6;
+    scoreEl.textContent = '0';
+    posY = 0;
+    velocityY = 0;
+    dinoEl.style.bottom = '0px';
+
+    obstacleList.forEach(el => el.remove());
+    obstacleList = [];
+
+    clearInterval(gameFrame);
+    clearInterval(obstacleSpawnTimer);
+    gameFrame = setInterval(gameTick, 20);
+
+    // 每次生成后随机下一次间隔，不再固定时长，分布错落
+    function resetSpawn() {
+        let randomGap = 700 + Math.random() * 1100;
+        obstacleSpawnTimer = setTimeout(()=>{
+            spawnCactus();
+            resetSpawn();
+        }, randomGap);
+    }
+    resetSpawn();
+}
+
+function gameOver() {
+    gameRunning = false;
+    clearInterval(gameFrame);
+    clearTimeout(obstacleSpawnTimer);
+    alert(`游戏结束！最终得分：${score}\n按空格或点击画面重新开始`);
+}
+
+document.addEventListener('keydown', e => {
+    if (e.code === 'Space') doJump();
+});
+
+gameArea.addEventListener('click', doJump);
+</script>
+</body>
+</html>
