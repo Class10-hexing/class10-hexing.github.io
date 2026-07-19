@@ -224,7 +224,24 @@ window.addEventListener('DOMContentLoaded', function(){
             </div>
         </div>
     </footer>
-
+    <script>
+    // 仅在手机触屏设备执行修复
+    if ('ontouchstart' in window) {
+      document.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+          // 阻止点击菜单项时向上冒泡，避免父下拉直接收起
+          e.stopPropagation();
+        });
+      });
+    }
+    </script>
+    <style>
+@media (max-width: 768px) {
+  .dropdown {
+    pointer-events: auto !important;
+  }
+}
+</style>
 </body>
 
 </html>
