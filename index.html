@@ -93,7 +93,7 @@ window.addEventListener('DOMContentLoaded', function(){
 
     if (!loginInfo) {
         // 未登录：显示文字为登录，点击跳转到登录页
-        userNameShow.innerText = '登录';
+        userNameShow.innerText = '您还未登录';
         userNameShow.setAttribute('href', './login.html');
         userNameShow.classList.remove('dropdown-toggle');
         adminConfigBtn.classList.add('d-none');
@@ -149,7 +149,7 @@ window.addEventListener('DOMContentLoaded', function(){
                             <li><a class="dropdown-item" href="/game/hall.html">游戏中心</a></li>
                             <li><a class="dropdown-item" href="#">留言墙</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><button class="dropdown-item" onclick="ClassLogin.logout()">退出登录</button></li>
+                            <li><button class="dropdown-item" onclick="ClassLogin.logout()">登录/退出登录</button></li>
                         </ul>
                     </li>
                     </ul>
