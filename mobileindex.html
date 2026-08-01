@@ -75,7 +75,7 @@
             box-shadow: 0 1px 4px rgba(0,0,0,0.06);
         }
 
-        /* 校徽图片 */
+        /* 校徽图片容器 */
         .logo-img-box{
             width: 100%;
             border-radius: 12px;
@@ -115,11 +115,13 @@
             color: #2554b8;
         }
     </style>
+    <!-- 引入和电脑端同一个登录JS，保证 ClassLogin 全局方法可用 -->
+    <script src="./js/login.js"></script>
 </head>
 <body id="page-top">
     <!-- 顶部标题栏 -->
     <header class="mobile-header">
-        十班班级官网
+        朝阳十班_beta-手机版
     </header>
 
     <div class="container">
@@ -129,13 +131,13 @@
             <a href="/game/hall" class="func-card">游戏中心</a>
         </div>
 
-        <!-- 校徽图片 -->
+        <!-- 班徽图片 -->
         <div class="logo-img-box">
-            <img src="/static/assets/img/photo.png" alt="班级徽章">
+            <img src="/static/assets/img/photo.png" alt="班徽">
         </div>
     </div>
 
-    <!-- 公告主体区域 -->
+    <!-- 更新通知区域 -->
     <main class="container">
         <div style="background:#fff;padding:20px;border-radius:12px;">
             <h3>更新通知</h3>
@@ -158,20 +160,23 @@
     </nav>
 
     <footer id="footer" class="container" style="margin-top:40px;text-align:center;color:#888;font-size:13px;">
-        Class10 班级网站 · 手机适配版
+        朝阳十班_beta-手机版
     </footer>
 
+    <!-- 手机端登录状态逻辑 -->
     <script>
-        // 登录状态管理
-        const savedName = localStorage.getItem("site_username");
+        const loginInfo = window.ClassLogin?.getLogin();
         const userBox = document.getElementById("userCard");
-        if(savedName){
-            userBox.innerText = savedName;
-            userBox.href = "javascript:;";
-            userBox.onclick = ()=>{
-                if(confirm("确认退出登录？")){
-                    localStorage.removeItem("site_username");
-                    location.reload();
+
+        if (!loginInfo) {
+            userBox.innerText = "登录";
+            userBox.href = "./login.html";
+        } else {
+            userBox.innerText = loginInfo.userName;
+            userBox.href = "javascript:void(0)";
+            userBox.onclick = function () {
+                if (confirm("确认退出当前账号吗？")) {
+                    window.ClassLogin.logout();
                 }
             }
         }
