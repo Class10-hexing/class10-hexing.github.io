@@ -42,6 +42,21 @@
     <!-- login -->
     <script src="./js/login.js"></script>
 
+    <!-- phone -->
+    <script>
+    (function() {
+        function judgeMobile() {
+            // UA判断 + 屏幕宽度双重校验，容错更高
+            const uaTest = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const widthTest = window.innerWidth <= 768;
+            return uaTest || widthTest;
+        }
+        if(judgeMobile()) {
+            location.assign("./mobileindex.html");
+        }
+    })();
+    </script>
+
     <!-- Mathematics -->
     <script>
         // See https://docs.mathjax.org/en/latest/index.html for more details.
