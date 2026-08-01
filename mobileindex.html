@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="format-detection" content="telephone=no">
-    <title>十班官网 - 手机版</title>
+    <title>朝阳十班_beta-手机版</title>
     <style>
         * {
             margin: 0;
@@ -75,27 +75,18 @@
             box-shadow: 0 1px 4px rgba(0,0,0,0.06);
         }
 
-        /* 平铺菜单列表 */
-        .menu-list {
-            background: #fff;
+        /* 校徽图片 */
+        .logo-img-box{
+            width: 100%;
             border-radius: 12px;
             overflow: hidden;
-            margin: 20px 0;
+            background: #fff;
+            padding:12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
-        .menu-item {
-            padding: 16px 20px;
-            border-bottom: 1px solid #eee;
-            font-size: 16px;
-            min-height: 52px;
-            display: flex;
-            align-items: center;
-            transition: background-color 0.2s;
-        }
-        .menu-item:active {
-            background-color: #f3f4f6;
-        }
-        .menu-item:last-child {
-            border-bottom: none;
+        .logo-img-box img{
+            width:100%;
+            display:block;
         }
 
         /* 底部常驻导航栏 */
@@ -134,13 +125,13 @@
     <div class="container">
         <!-- 快捷功能卡片区 -->
         <div class="card-group">
-            <a href="/login" class="func-card">登录</a>
+            <a href="/login" class="func-card" id="userCard">登录</a>
             <a href="/game/hall" class="func-card">游戏中心</a>
         </div>
 
-        <!-- 中间图片区域 -->
-        <div class="container">
-            <img src="/static/assets/img/photo.png" alt="班徽" style="width:100%;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <!-- 校徽图片 -->
+        <div class="logo-img-box">
+            <img src="/static/assets/img/photo.png" alt="班级徽章">
         </div>
     </div>
 
@@ -169,5 +160,21 @@
     <footer id="footer" class="container" style="margin-top:40px;text-align:center;color:#888;font-size:13px;">
         Class10 班级网站 · 手机适配版
     </footer>
+
+    <script>
+        // 登录状态管理
+        const savedName = localStorage.getItem("site_username");
+        const userBox = document.getElementById("userCard");
+        if(savedName){
+            userBox.innerText = savedName;
+            userBox.href = "javascript:;";
+            userBox.onclick = ()=>{
+                if(confirm("确认退出登录？")){
+                    localStorage.removeItem("site_username");
+                    location.reload();
+                }
+            }
+        }
+    </script>
 </body>
 </html>
