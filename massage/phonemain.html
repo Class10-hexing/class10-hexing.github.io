@@ -1,0 +1,272 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="format-detection" content="telephone=no">
+    <title>班级群聊_朝阳十班_beta-手机版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        html, body {
+            width: 100%;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-color: #f7f8fa;
+        }
+        a {
+            text-decoration: none;
+            color: #222;
+        }
+        ul, li {
+            list-style: none;
+        }
+
+        /* 顶部头部横幅 和首页统一 */
+        .mobile-header {
+            background: #2554b8;
+            color: #fff;
+            padding: 18px 20px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        /* 聊天容器 */
+        .chat-wrap {
+            width: 94%;
+            margin: 14px auto;
+            /* 预留底部输入框 + 底部导航高度 */
+            padding-bottom: 140px;
+        }
+
+        /* 消息通用 */
+        .msg-item {
+            margin: 12px 0;
+            display: flex;
+        }
+        /* 别人消息 居左 */
+        .msg-left {
+            justify-content: flex-start;
+        }
+        /* 自己消息 居右 */
+        .msg-right {
+            justify-content: flex-end;
+        }
+
+        .msg-box {
+            max-width: 75%;
+        }
+        .msg-name {
+            font-size: 12px;
+            color: #777;
+            margin-bottom: 4px;
+            padding-left: 8px;
+        }
+        .msg-content {
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        .msg-left .msg-content {
+            background: #ffffff;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            border-bottom-left-radius: 4px;
+        }
+        .msg-right .msg-content {
+            background: #2554b8;
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+        .msg-time {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 3px;
+            padding-right: 8px;
+            text-align: right;
+        }
+
+        /* 底部输入区域 */
+        .chat-input-area {
+            position: fixed;
+            bottom: 64px;
+            left: 0;
+            width: 100%;
+            background: #fff;
+            padding:10px 3%;
+            border-top:1px solid #e5e7eb;
+            display:flex;
+            gap:10px;
+            align-items:center;
+        }
+        #chatInput {
+            flex:1;
+            border:1px solid #ddd;
+            border-radius:20px;
+            padding:10px 16px;
+            font-size:15px;
+            outline:none;
+        }
+        #sendBtn {
+            background:#2554b8;
+            color:white;
+            border:none;
+            border-radius:20px;
+            padding:10px 18px;
+            font-size:15px;
+        }
+        #sendBtn:active{
+            opacity:0.85;
+        }
+        #sendBtn.disabled{
+            background:#b4c2e0;
+        }
+
+        /* 底部常驻导航栏 和首页完全一致 */
+        .mobile-footer-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 64px;
+            background: #fff;
+            display: flex;
+            border-top: 1px solid #e5e7eb;
+            z-index: 999;
+        }
+        .footer-nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            color: #555;
+            transition: color 0.2s;
+        }
+        .footer-nav-item.active {
+            color: #2554b8;
+        }
+
+        /* 登录遮罩提示 */
+        .login-tip{
+            text-align:center;
+            padding:60px 20px;
+            color:#888;
+        }
+    </style>
+    <!-- 共用登录JS -->
+    <script src="./js/login.js"></script>
+</head>
+<body>
+    <header class="mobile-header">
+        班级闲聊群
+    </header>
+
+    <div class="chat-wrap" id="chatContainer">
+        <!-- 消息动态渲染区域 -->
+        <div id="messageList">
+            <!-- 示例消息 -->
+            <div class="msg-item msg-left">
+                <div class="msg-box">
+                    <div class="msg-name">小明</div>
+                    <div class="msg-content">有人暑假一起出去玩吗？</div>
+                    <div class="msg-time">08-03 14:20</div>
+                </div>
+            </div>
+            <div class="msg-item msg-left">
+                <div class="msg-box">
+                    <div class="msg-name">班长</div>
+                    <div class="msg-content">别水群，适度聊天😂</div>
+                    <div class="msg-time">08-03 14:22</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部输入框 -->
+    <div class="chat-input-area" id="inputBox">
+        <input type="text" id="chatInput" placeholder="输入消息..." autocomplete="off">
+        <button id="sendBtn">发送</button>
+    </div>
+
+    <!-- 底部导航 -->
+    <nav class="mobile-footer-nav">
+        <a href="./index.html" class="footer-nav-item">首页</a>
+        <a href="./phonemain.html" class="footer-nav-item active">讨论版</a>
+        <a href="/game/phonehall" class="footer-nav-item">游戏中心</a>
+        <a href="/index" class="footer-nav-item">电脑版</a>
+    </nav>
+
+    <script>
+        const loginInfo = window.ClassLogin?.getLogin();
+        const msgList = document.getElementById('messageList');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const inputBox = document.getElementById('inputBox');
+
+        // 未登录处理
+        if(!loginInfo){
+            inputBox.style.display = "none";
+            msgList.innerHTML = `
+                <div class="login-tip">
+                    <p style="font-size:16px;">请登录班级账号后参与聊天</p>
+                    <br>
+                    <button onclick="location.href='./login.html'" style="background:#2554b8;color:#fff;border:none;padding:10px 22px;border-radius:10px;">前往登录</button>
+                </div>
+            `
+        }
+
+        // 组装一条消息DOM
+        function addMessage(name, content, isSelf) {
+            const now = new Date();
+            const timeStr = `${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+            const div = document.createElement('div');
+            div.className = `msg-item ${isSelf ? "msg-right" : "msg-left"}`;
+            div.innerHTML = `
+                <div class="msg-box">
+                    <div class="msg-name">${name}</div>
+                    <div class="msg-content">${content}</div>
+                    <div class="msg-time">${timeStr}</div>
+                </div>
+            `;
+            msgList.appendChild(div);
+            // 滚动到底部
+            document.getElementById('chatContainer').scrollTop = msgList.scrollHeight;
+        }
+
+        // 发送消息逻辑
+        sendBtn.onclick = function(){
+            const text = chatInput.value.trim();
+            if(!text) return;
+
+            // 本地先渲染自己消息
+            addMessage(loginInfo.userName, text, true);
+            chatInput.value = "";
+
+            // ========== 重点：这里后续对接聊天持久化服务 ==========
+            // 发送API：把昵称、消息、时间上传，同时拉取其他人消息
+            // 后续接入 Waline / Twikoo 就替换这块代码
+            console.log("待提交消息：", loginInfo.userName, text);
+        }
+
+        // 回车发送
+        chatInput.addEventListener("keydown", e=>{
+            if(e.key === "Enter") sendBtn.click();
+        })
+    </script>
+</body>
+</html>
